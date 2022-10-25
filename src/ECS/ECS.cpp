@@ -4,6 +4,7 @@
 #include "../Logger/Logger.h"
 #include <string>
 #include <algorithm>
+#include "../Systems/MovementSystem.h"
 
 int IComponent::nextId = 0;
 
@@ -12,15 +13,15 @@ int Entity::GetId() const{
 }
 
 void System::AddEntityToSystem(Entity entity) {
+  entities.push_back(entity);
+}
+
+void System::RemoveEntityFromSystem(Entity entity) {
 	entities.erase(std::remove_if(entities.begin(), entities.end(), [&entity](Entity other) {
 	return entity == other;
 	}), entities.end());
 }
 
-void System::RemoveEntityFromSystem(Entity entity) {
-
-	
-}
 std::vector<Entity> System::GetSystemEntities() const{
 	return entities;
 }
@@ -56,6 +57,7 @@ void Registry::AddEntityToSystems(Entity entity){
 
     if(isInterested) {
       system.second->AddEntityToSystem(entity);
+      Logger::Log("Entity id: " + std::to_string(entityId) + " added to system ");
     }
   }
 }
@@ -64,5 +66,6 @@ void Registry::Update() {
   for(auto entity: entitiesToBeAdded) {
     AddEntityToSystems(entity);
   }
+
   entitiesToBeAdded.clear();
 }

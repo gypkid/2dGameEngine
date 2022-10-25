@@ -9,6 +9,7 @@
 #include <memory>
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Systems/MovementSystem.h"
 
 glm::vec2 playerPosition;
 glm::vec2 velocity;
@@ -26,8 +27,9 @@ Game::~Game() {
 
 void Game::Setup() {
 
+  registry->AddSystem<MovementSystem>();
+
   Entity tank = registry->CreateEntity();
-  Entity truck = registry->CreateEntity();
 
   tank.AddComponent<TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0f );
   tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0));
@@ -101,17 +103,14 @@ void Game::ProcessInput() {
 }
 
 void Game::Update(float delta) {
-	
-	//MovementSystem.Update();
-	//CollisionSystem.Update();
+	registry->GetSystem<MovementSystem>().Update(delta);
+  registry->Update();
 }
 
 void Game::Render() {
 	
 	SDL_SetRenderDrawColor(renderer, 64, 64, 64, 0);
 	SDL_RenderClear(renderer);
-
-	// Render game objects
 
 	SDL_RenderPresent(renderer);
 }
@@ -129,5 +128,4 @@ void Game::Destroy() {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-
 }
