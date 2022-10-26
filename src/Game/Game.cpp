@@ -9,10 +9,10 @@
 #include <memory>
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Components/SpriteComponent.h"
 #include "../Systems/MovementSystem.h"
+#include "../Systems/RenderSystem.h"
 
-glm::vec2 playerPosition;
-glm::vec2 velocity;
 GameTime gameTime;
 
 Game::Game() {
@@ -26,14 +26,18 @@ Game::~Game() {
 }
 
 void Game::Setup() {
-
   registry->AddSystem<MovementSystem>();
+  registry->AddSystem<RenderSystem>();
 
   Entity tank = registry->CreateEntity();
-
   tank.AddComponent<TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0f );
   tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0));
-
+  tank.AddComponent<SpriteComponent>(32, 32);
+  
+  Entity truck= registry->CreateEntity();
+  truck.AddComponent<TransformComponent>(glm::vec2(200.0, 250.0), glm::vec2(1.0, 1.0), 0.0f );
+  truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, -20.0));
+  truck.AddComponent<SpriteComponent>(16, 32);
 }
 
 void Game::Initialize() {
@@ -111,7 +115,9 @@ void Game::Render() {
 	
 	SDL_SetRenderDrawColor(renderer, 64, 64, 64, 0);
 	SDL_RenderClear(renderer);
-
+  
+  registry->GetSystem<RenderSystem>().Update(renderer);
+  
 	SDL_RenderPresent(renderer);
 }
 

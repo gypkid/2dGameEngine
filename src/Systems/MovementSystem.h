@@ -17,18 +17,10 @@ class MovementSystem : public System {
   	  for (auto entity : GetSystemEntities()) {
         auto& transform = entity.GetComponent<TransformComponent>();
         const auto rigidbody = entity.GetComponent<RigidBodyComponent>();
-        
-        Logger::Log("Entity in update loop");
 
         transform.position.x += rigidbody.velocity.x * delta;
         transform.position.y += rigidbody.velocity.y * delta;
 
-        Logger::Log("Entity id: " + 
-            std::to_string(entity.GetId()) + 
-              " position is now (x:" + 
-              std::to_string(transform.position.x) + 
-              ", y:" + std:: to_string(transform.position.y) + 
-              ")");
       }
 		}
 };
