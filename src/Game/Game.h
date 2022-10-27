@@ -21,7 +21,8 @@ public:
 	~Game();
 	void Initialize();
 	void Run();
-	void Setup();
+	void LoadLevel(int level);
+  void Setup();
 	void ProcessInput();
 	void Update(float delta);
 	void Render();

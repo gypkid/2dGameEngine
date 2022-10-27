@@ -13,6 +13,7 @@
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../AssetLib/AssetLib.h"
+#include <fstream>
 
 GameTime gameTime;
 
@@ -25,24 +26,6 @@ Game::Game() {
 
 Game::~Game() {
 	Logger::Log("Game destructed");
-}
-
-void Game::Setup() {
-  registry->AddSystem<MovementSystem>();
-  registry->AddSystem<RenderSystem>();
-
-  assetLib->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
-  assetLib->AddTexture(renderer, "truck-image", "./assets/image/truck-ford-right.png");
-
-  Entity tank = registry->CreateEntity();
-  tank.AddComponent<TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0f );
-  tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0));
-  tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
-  
-  Entity truck= registry->CreateEntity();
-  truck.AddComponent<TransformComponent>(glm::vec2(200.0, 250.0), glm::vec2(1.0, 1.0), 0.0f );
-  truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, -20.0));
-  truck.AddComponent<SpriteComponent>("truck-image", 16, 32);
 }
 
 void Game::Initialize() {
@@ -91,6 +74,53 @@ void Game::Initialize() {
 	isRunning = true;
 }
 
+void Game::LoadLevel(int level){
+  registry->AddSystem<MovementSystem>();
+  registry->AddSystem<RenderSystem>();
+
+  assetLib->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
+  assetLib->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
+  assetLib->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
+  
+  int tileSize = 32;
+  float tileScale = 2.0;
+  int mapNumCols = 25;
+  int mapNumRows = 20;
+
+  std::fstream mapFile;
+  mapFile.open("./assets/tilemaps/jungle.map");
+
+  for (int y = 0; y < mapNumRows; y++) {
+    for(int x = 0; x < mapNumCols; x++) {
+      char ch;
+      mapFile.get(ch);
+      int srcRectY = std::atoi(&ch) * tileSize;
+      mapFile.get(ch);
+      int srcRectX = std::atoi(&ch) * tileSize;
+      mapFile.ignore();
+
+      Entity tile = registry->CreateEntity();
+      tile.AddComponent<TransformComponent>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)), glm::vec2(tileScale, tileScale), 0.0);
+      tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, srcRectX, srcRectY);
+    }
+  }
+  mapFile.close();
+
+  Entity tank = registry->CreateEntity();
+  tank.AddComponent<TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(2.0, 2.0), 0.0f );
+  tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0));
+  tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
+  
+  Entity truck= registry->CreateEntity();
+  truck.AddComponent<TransformComponent>(glm::vec2(200.0, 250.0), glm::vec2(2.0, 2.0), 0.0f );
+  truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, -20.0));
+  truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
+}
+
+void Game::Setup() {
+  LoadLevel(0);
+}
+
 void Game::ProcessInput() {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
@@ -121,7 +151,7 @@ void Game::Render() {
 	SDL_SetRenderDrawColor(renderer, 64, 64, 64, 0);
 	SDL_RenderClear(renderer);
   
-  registry->GetSystem<RenderSystem>().Update(renderer);
+  registry->GetSystem<RenderSystem>().Update(renderer, assetLib);
   
 	SDL_RenderPresent(renderer);
 }
