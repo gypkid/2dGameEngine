@@ -12,12 +12,14 @@
 #include "../Components/SpriteComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../AssetLib/AssetLib.h"
 
 GameTime gameTime;
 
 Game::Game() {
 	isRunning = false;
-  registry = std::make_unique<Registry>();
+  	registry = std::make_unique<Registry>();
+	assetLib = std::make_unique<AssetLib>();
 	Logger::Log("Game is Running");
 }
 
@@ -29,15 +31,18 @@ void Game::Setup() {
   registry->AddSystem<MovementSystem>();
   registry->AddSystem<RenderSystem>();
 
+  assetLib->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
+  assetLib->AddTexture(renderer, "truck-image", "./assets/image/truck-ford-right.png");
+
   Entity tank = registry->CreateEntity();
   tank.AddComponent<TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0f );
   tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0));
-  tank.AddComponent<SpriteComponent>(32, 32);
+  tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
   
   Entity truck= registry->CreateEntity();
   truck.AddComponent<TransformComponent>(glm::vec2(200.0, 250.0), glm::vec2(1.0, 1.0), 0.0f );
   truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, -20.0));
-  truck.AddComponent<SpriteComponent>(16, 32);
+  truck.AddComponent<SpriteComponent>("truck-image", 16, 32);
 }
 
 void Game::Initialize() {

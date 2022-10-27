@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include "../ECS/ECS.h"
+#include "../AssetLib/AssetLib.h"
 
 class Game {
 private:
@@ -10,8 +11,8 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
-  std::unique_ptr<Registry> registry;
-
+  	std::unique_ptr<Registry> registry;
+	std::unique_ptr<AssetLib> assetLib;
 public:
 	int windowWitdh;
 	int windowHeight;
