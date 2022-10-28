@@ -5,6 +5,7 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/SpriteComponent.h"
 #include <SDL2/SDL.h>
+#include <algorithm>
 
 class RenderSystem: public System {
   public:
@@ -14,9 +15,28 @@ class RenderSystem: public System {
     }
 
     void Update(SDL_Renderer* renderer, std::unique_ptr<AssetLib>& assetLib){
-      for(auto entity: GetSystemEntities()) {
-        const auto transform = entity.GetComponent<TransformComponent>();
-        const auto sprite = entity.GetComponent<SpriteComponent>();
+
+      struct RandomableEntity
+      {
+        TransformComponent transformComponent;
+        SpriteComponent spriteComponent;
+      };
+
+      std::vector<RandomableEntity> randomableEntities;
+      for (auto entity: GetSystemEntities()){
+        RandomableEntity randomableEntity;
+        randomableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
+        randomableEntity.transformComponent = entity.GetComponent<TransformComponent>();
+        randomableEntities.emplace_back(randomableEntity);
+      }
+
+      std::sort(randomableEntities.begin(),randomableEntities.end(), [](const RandomableEntity& a, const RandomableEntity& b) {
+        return a.spriteComponent.zIndex < b.spriteComponent.zIndex;
+      });
+      
+      for(auto entity: randomableEntities) {
+        const auto transform = entity.transformComponent;
+        const auto sprite = entity.spriteComponent;
 
         SDL_Rect srcRect = sprite.srcRect;
 

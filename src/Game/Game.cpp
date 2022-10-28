@@ -14,6 +14,7 @@
 #include "../Systems/RenderSystem.h"
 #include "../AssetLib/AssetLib.h"
 #include <fstream>
+#include <sstream>
 
 GameTime gameTime;
 
@@ -83,38 +84,61 @@ void Game::LoadLevel(int level){
   assetLib->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
   
   int tileSize = 32;
-  float tileScale = 2.0;
+  double tileScale = 2.0;
   int mapNumCols = 25;
   int mapNumRows = 20;
 
-  std::fstream mapFile;
-  mapFile.open("./assets/tilemaps/jungle.map");
 
-  for (int y = 0; y < mapNumRows; y++) {
-    for(int x = 0; x < mapNumCols; x++) {
-      char ch;
-      mapFile.get(ch);
-      int srcRectY = std::atoi(&ch) * tileSize;
-      mapFile.get(ch);
-      int srcRectX = std::atoi(&ch) * tileSize;
-      mapFile.ignore();
 
-      Entity tile = registry->CreateEntity();
-      tile.AddComponent<TransformComponent>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)), glm::vec2(tileScale, tileScale), 0.0);
-      tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, srcRectX, srcRectY);
-    }
-  }
-  mapFile.close();
+	std::ifstream tilemap("./assets/tilemaps/jungle.map");
+
+	if(tilemap.is_open()) {
+		Logger::Log("Loading Tilemap...");
+
+		int columns = 10;           
+		int tilesize = 32;          
+		double tileScale = 1.0;     
+
+		int x = 0;
+		int y = 0;
+
+		std::string line;
+
+		while(std::getline(tilemap, line)) {
+			std::stringstream lineStream(line);
+			std::string cell;
+
+			while(std::getline(lineStream, cell, ',')) {
+				int cellIndex = std::stoi(cell);
+
+				Entity mapCell = registry->CreateEntity();
+				mapCell.AddComponent<TransformComponent>(glm::vec2(x, y), glm::vec2(tileScale, tileScale), 0.0);
+
+				int srcRectX = (cellIndex%columns)*tilesize;
+				int srcRectY = (cellIndex/columns)*tilesize;
+			
+				mapCell.AddComponent<SpriteComponent>("tilemap-image", tilesize, tilesize, 0,  srcRectX, srcRectY);
+				x += tilesize * tileScale;
+			}
+				
+			x = 0;
+			y += tilesize * tileScale;
+		}
+			
+		tilemap.close();
+	} else {
+			Logger::Err("Error opening tilemap file");
+	}
 
   Entity tank = registry->CreateEntity();
   tank.AddComponent<TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(2.0, 2.0), 0.0f );
   tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0));
-  tank.AddComponent<SpriteComponent>("tank-image", 32, 32);
+  tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 1);
   
   Entity truck= registry->CreateEntity();
   truck.AddComponent<TransformComponent>(glm::vec2(200.0, 250.0), glm::vec2(2.0, 2.0), 0.0f );
   truck.AddComponent<RigidBodyComponent>(glm::vec2(40.0, -20.0));
-  truck.AddComponent<SpriteComponent>("truck-image", 32, 32);
+  truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 1);
 }
 
 void Game::Setup() {
