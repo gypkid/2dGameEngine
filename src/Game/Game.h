@@ -8,6 +8,7 @@
 class Game {
 private:
 	bool isRunning;
+	bool isDebug;
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 
