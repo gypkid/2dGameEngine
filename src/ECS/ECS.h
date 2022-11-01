@@ -27,13 +27,13 @@ class Entity {
 		int id;
 	public:
 		Entity(int id) : id(id) {};
-    Entity(const Entity& entity) = default;
+    	Entity(const Entity& entity) = default;
 		int GetId() const;
 
 		bool operator == (const Entity& other) const { return id == other.id; }
 		bool operator != (const Entity& other) const { return id != other.id; }
-    bool operator >(const Entity& other) const { return id > other.id; }
-    bool operator <(const Entity& other) const { return id < other.id; }
+    	bool operator >(const Entity& other) const { return id > other.id; }
+    	bool operator <(const Entity& other) const { return id < other.id; }
 
     template <typename TComponent, typename ...TArgs> void AddComponent(TArgs&& ...args);
     template <typename TComponent> void RemoveComponent();
