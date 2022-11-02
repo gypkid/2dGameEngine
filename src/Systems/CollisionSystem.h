@@ -43,6 +43,8 @@ class CollisionSystem: public System {
 
                     if (collisionHappend){
                         Logger::Log("Entitie: " + std::to_string(a.GetId()) + " collied with entitie " + std::to_string(b.GetId()));
+                        a.Kill();
+                        b.Kill();
                     }
                 }
             }     

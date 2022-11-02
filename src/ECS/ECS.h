@@ -8,6 +8,7 @@
 #include <typeindex>
 #include <set>
 #include <memory>
+#include <deque>
 
 const unsigned int MAX_COMPONENTS = 32;
 typedef std::bitset<MAX_COMPONENTS> Signature;
@@ -29,18 +30,19 @@ class Entity {
 		Entity(int id) : id(id) {};
     	Entity(const Entity& entity) = default;
 		int GetId() const;
+		void Kill();
 
 		bool operator == (const Entity& other) const { return id == other.id; }
 		bool operator != (const Entity& other) const { return id != other.id; }
     	bool operator >(const Entity& other) const { return id > other.id; }
     	bool operator <(const Entity& other) const { return id < other.id; }
 
-    template <typename TComponent, typename ...TArgs> void AddComponent(TArgs&& ...args);
-    template <typename TComponent> void RemoveComponent();
-    template <typename TComponent> bool HasComponent() const;
-    template <typename TComponent> TComponent& GetComponent() const;
+		template <typename TComponent, typename ...TArgs> void AddComponent(TArgs&& ...args);
+		template <typename TComponent> void RemoveComponent();
+		template <typename TComponent> bool HasComponent() const;
+		template <typename TComponent> TComponent& GetComponent() const;
 
-    class Registry* registry;
+		class Registry* registry;
 };
 
 template <typename TComponent>
@@ -122,29 +124,32 @@ class Registry {
 		std::unordered_map < std::type_index, std::shared_ptr<System>> systems;
 		std::set<Entity> entitiesToBeAdded;
 		std::set<Entity> entitiesToBeKilled;
+		std::deque<int> freeIds;
 	public:
 		Registry(){
-      Logger::Log("Registry constructor called");
-    }
-    ~Registry(){
-      Logger::Log("Registry destructor called");
-    }
+      	Logger::Log("Registry constructor called");
+    	}
+		~Registry(){
+		Logger::Log("Registry destructor called");
+		}
 
 		Entity CreateEntity();
-		
-    void Update();
-		
-    template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
-    template <typename TComponent> void RemoveComponent(Entity entity);
-    template <typename TComponent> bool HasComponent(Entity entity) const;
-    template <typename TComponent> TComponent& GetComponent(Entity entity) const;
+		void KillEntity(Entity entity);
+			
+		void Update();
+			
+		template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
+		template <typename TComponent> void RemoveComponent(Entity entity);
+		template <typename TComponent> bool HasComponent(Entity entity) const;
+		template <typename TComponent> TComponent& GetComponent(Entity entity) const;
 
-    template <typename TSystem, typename ...Targs> void AddSystem(Targs&& ...args);
-    template <typename TSystem> void RemoveSystem();
-    template <typename TSystem> bool HasSystem() const;
-    template <typename TSystem> TSystem& GetSystem() const;
-    
-    void AddEntityToSystems(Entity entity);
+		template <typename TSystem, typename ...Targs> void AddSystem(Targs&& ...args);
+		template <typename TSystem> void RemoveSystem();
+		template <typename TSystem> bool HasSystem() const;
+		template <typename TSystem> TSystem& GetSystem() const;
+		
+		void AddEntityToSystems(Entity entity);
+		void RemoveEntityFromSystems(Entity entity);
 };
 
 template <typename TComponent>
