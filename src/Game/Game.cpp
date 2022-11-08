@@ -19,13 +19,16 @@
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderColliderSystem.h"
+#include "../Systems/DamageSystem.h"
 #include "../AssetLib/AssetLib.h"
+#include "../EventBus/EventBus.h"
 
 Game::Game() {
 	isRunning = false;
   	isDebug = false;
 	registry = std::make_unique<Registry>();
 	assetLib = std::make_unique<AssetLib>();
+	eventBus = std::make_unique<EventBus>();
 	Logger::Log("Game is Running");
 }
 
@@ -84,7 +87,8 @@ void Game::LoadLevel(int level){
   registry->AddSystem<RenderSystem>();
   registry->AddSystem<AnimationSystem>();
   registry->AddSystem<CollisionSystem>();
-  registry->AddSystem<RenderColliderSystem>();	
+  registry->AddSystem<RenderColliderSystem>();
+  registry->AddSystem<DamageSystem>();	
 
   assetLib->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
   assetLib->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
@@ -184,10 +188,14 @@ void Game::ProcessInput() {
 }
 
 void Game::Update(float delta) {
+	eventBus->Reset();
+
+	registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+
+	registry->Update();
 	registry->GetSystem<MovementSystem>().Update(delta);
 	registry->GetSystem<AnimationSystem>().Update();
-  	registry->GetSystem<CollisionSystem>().Update();
-	registry->Update();
+  	registry->GetSystem<CollisionSystem>().Update(eventBus);
 }
 
 void Game::Render() {

@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include "../ECS/ECS.h"
 #include "../AssetLib/AssetLib.h"
+#include "../EventBus/EventBus.h"
 
 class Game {
 private:
@@ -14,6 +15,7 @@ private:
 
   	std::unique_ptr<Registry> registry;
 	std::unique_ptr<AssetLib> assetLib;
+	std::unique_ptr<EventBus> eventBus;
 public:
 	int windowWitdh;
 	int windowHeight;
