@@ -25,9 +25,10 @@
 #include "../AssetLib/AssetLib.h"
 #include "../EventBus/EventBus.h"
 
+bool Game::isRunning = false;
+bool Game::isDebug = false;
+
 Game::Game() {
-	isRunning = false;
-  	isDebug = false;
 	registry = std::make_unique<Registry>();
 	assetLib = std::make_unique<AssetLib>();
 	eventBus = std::make_unique<EventBus>();
@@ -37,6 +38,14 @@ Game::Game() {
 Game::~Game() {
 	Logger::Log("Game destructed");
 }
+
+// void Game::Running(bool running){
+// 	isRunning = running;
+// }
+
+// void Game::Debug(){
+// 	isDebug = !isDebug;
+// }
 
 void Game::Initialize() {
 
@@ -175,31 +184,41 @@ void Game::Setup() {
 
 void Game::ProcessInput() {
 	SDL_Event event;
+	// while (SDL_PollEvent(&event)) {
+	// 	switch (event.type) {
+	// 		case SDL_QUIT:
+	// 			isRunning = false;
+	// 			break;
+	// 		case SDL_KEYDOWN:
+	// 			switch (event.key.keysym.sym) {
+	// 				case SDLK_ESCAPE:
+	// 					isRunning = false;
+	// 					break;
+	// 				case SDLK_d:
+	// 					isDebug = !isDebug;
+	// 					break;
+	// 				default:
+	// 					eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym, event);
+	// 					break;
+	// 			}
+	// 		case SDL_KEYUP:
+	// 			switch (event.key.keysym.sym)
+	// 			{
+	// 				default:
+	// 					eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym, event);
+	// 					break;
+	// 			}
+	// 		break;
+	// 	}
+	//}
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 			case SDL_QUIT:
 				isRunning = false;
 				break;
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym) {
-					case SDLK_ESCAPE:
-						isRunning = false;
-						break;
-					case SDLK_d:
-						isDebug = !isDebug;
-						break;
-					default:
-						eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym, event);
-						break;
-				}
-			case SDL_KEYUP:
-				switch (event.key.keysym.sym)
-				{
-					default:
-						eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym, event);
-						break;
-				}
-			break;
+			default:
+				eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym, event);
+				break;
 		}
 	}
 }

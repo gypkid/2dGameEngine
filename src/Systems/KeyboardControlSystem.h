@@ -1,6 +1,7 @@
 #ifndef KEYBOARDCONTROLSYSTEM_H
 #define KEYBOARDCONTROLSYSTEM_H
 
+#include "../Game/Game.h"
 #include "../ECS/ECS.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/KeyPressedEvent.h"
@@ -31,6 +32,14 @@ class KeyboardControlSystem: public System {
                 if(event.keyevent.type == SDL_KEYDOWN){
                     switch (event.symbol)
                     {
+                        case SDLK_ESCAPE:
+                            Game::isRunning = false;
+						    //Game::Running(false);
+						    break;
+					    case SDLK_d:
+                            Game::isDebug = !Game::isDebug;
+						    //Game::Debug();
+						    break;
                         case SDLK_UP:
                             rigidbody.velocity = keyboardcontrol.upVelocity;
                             sprite.srcRect.y = sprite.height * 0;
