@@ -14,12 +14,14 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
+#include "../Components/KeyboardControlledComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/DamageSystem.h"
+#include "../Systems/KeyboardControlSystem.h"
 #include "../AssetLib/AssetLib.h"
 #include "../EventBus/EventBus.h"
 
@@ -89,11 +91,12 @@ void Game::LoadLevel(int level){
   registry->AddSystem<CollisionSystem>();
   registry->AddSystem<RenderColliderSystem>();
   registry->AddSystem<DamageSystem>();	
+  registry->AddSystem<KeyboardControlSystem>();
 
   assetLib->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png");
   assetLib->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png");
   assetLib->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
-  assetLib->AddTexture(renderer, "chopper-image", "./assets/images/chopper.png");
+  assetLib->AddTexture(renderer, "chopper-image", "./assets/images/chopper-spritesheet.png");
 
   int tileSize = 32;
   double tileScale = 2.0;
@@ -145,6 +148,12 @@ void Game::LoadLevel(int level){
   chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0));
   chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 1);
   chopper.AddComponent<AnimationComponent>(2, 10);
+  chopper.AddComponent<KeyboardControlledComponent>(
+	glm::vec2(0, -40),
+	glm::vec2(40, 0),
+	glm::vec2(-40, 0),
+	glm::vec2(0, 40)
+  );
   
   Entity tank = registry->CreateEntity();
   tank.AddComponent<TransformComponent>(glm::vec2(10.0, 20.0), glm::vec2(1.0, 1.0), 0.0f );
@@ -180,22 +189,32 @@ void Game::ProcessInput() {
 						isDebug = !isDebug;
 						break;
 					default:
+						eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym, event);
 						break;
 				}
-				break;
+			case SDL_KEYUP:
+				switch (event.key.keysym.sym)
+				{
+					default:
+						eventBus->EmitEvent<KeyPressedEvent>(event.key.keysym.sym, event);
+						break;
+				}
+			break;
 		}
 	}
 }
 
 void Game::Update(float delta) {
 	eventBus->Reset();
-
+	
+	registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
 	registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
 
-	registry->Update();
 	registry->GetSystem<MovementSystem>().Update(delta);
 	registry->GetSystem<AnimationSystem>().Update();
   	registry->GetSystem<CollisionSystem>().Update(eventBus);
+	
+	registry->Update();
 }
 
 void Game::Render() {
